@@ -1,0 +1,108 @@
+<!-- signup page -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignUp</title>
+
+    <!-- css  -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .main {
+            background-color: orange;
+            height: 100vh;
+        }
+
+        .main .container {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .main .container h3 {
+            padding: 0.7rem;
+            text-transform: capitalize;
+        }
+
+        .main .container h1:nth-child(1) {
+            padding: 1rem;
+            text-transform: uppercase;
+        }
+
+        .main .container input {
+            padding: 0.3rem 0;
+            font-size: x-large;
+        }
+
+        .main .container button {
+            margin: 2rem;
+            padding: 1rem;
+            font-size: xx-large;
+            border-radius: 0.41rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- html  -->
+
+    <main class="main">
+        <div class="container">
+            <h1>sign up page</h1>
+            <h3>User Name</h3> <input placeholder="name" type="text">
+            <h3>Email Id</h3><input placeholder="example@.com" type="email">
+            <h3>Mobile Number</h3> <input placeholder="0123456789" type="number">
+            <h3>Password</h3> <input placeholder="****" type="password">
+            <button onclick="validate()">signUp</button>
+            <h1>Back to <a href="/">login</a> </h1>
+        </div>
+    </main>
+
+    <!-- script -->
+
+    <script>
+
+        let host = "http://localhost"
+        validate = async () => {
+            let arr = []
+            document.querySelectorAll("input").forEach((val, ind) => {
+                if (val.value == "") {
+                    val.style.backgroundColor = "red"
+                    arr[4] = true
+                }
+                arr[ind] = val.value
+            })
+            if (arr[4]) return
+
+            let obj = { name: arr[0], email: arr[1], mobileNumber: arr[2], password: arr[3] }
+
+            let result = await fetch(host + "/signup", { body: JSON.stringify(obj), method: "post" })
+            let end = await result.text()
+            if (end == "0") alert("user already exists. Try new")
+            else if (end == "-1") alert("name must not contain any special characters or starts with number")
+            else {
+                alert("account created")
+                document.write("redirecting to login page...")
+                setTimeout(() => {
+                    location.assign(host)
+                }, 3000)
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>

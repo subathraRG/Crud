@@ -1,0 +1,481 @@
+<!-- main page -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+
+    <!-- css -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        header {
+            background-color: orangered;
+        }
+
+        header .container {
+            background-color: yellow;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header .container .name {
+            background-color: blue;
+            display: flex;
+            justify-content: center;
+            width: 90%;
+        }
+
+        header .container .action {
+            width: 10%;
+            display: flex;
+            background-color: chartreuse;
+            justify-content: center;
+        }
+
+        header .container .action:hover {
+            background-color: red;
+            transition: 1s;
+            cursor: pointer;
+        }
+
+        nav {
+            background-color: aqua;
+        }
+
+        nav .actions {
+            background-color: crimson;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        nav .actions .inputs {
+            width: 50%;
+            background-color: chartreuse;
+            margin: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav .actions .inputs input {
+            margin: 0.5rem;
+            padding: 0.5rem;
+            font-size: x-large;
+            border-radius: 1rem;
+            border: none;
+        }
+
+        .input-cg {
+            display: flex;
+        }
+
+        .commands {
+            display: flex;
+            background-color: darksalmon;
+            justify-content: center;
+        }
+
+        nav .actions .commands h3 {
+            padding: 0.5rem;
+            margin: 5px;
+            border: 2px solid black;
+            border-radius: 1rem;
+        }
+
+        nav .actions .commands h3:hover {
+            background-color: tle;
+            transition: 0.5s;
+        }
+
+        main .notes {
+            display: grid;
+            grid-template-columns: 25% 25% 25% 25%;
+        }
+
+        .element {
+            overflow: hidden;
+            background-color: blueviolet;
+            padding: 1rem;
+            margin: 1rem;
+            height: 300px;
+            transition: 0.3s;
+        }
+
+        .element:hover {
+            transition: 0.3s;
+            margin: 2rem;
+            background-color: orange;
+            cursor: pointer;
+        }
+
+        .element-view {
+            background-color: darkgoldenrod;
+            padding: 1rem;
+        }
+
+        .extend {
+            display: flex;
+            background-color: darkslateblue;
+            align-items: center;
+            justify-content: space-around;
+            overflow: hidden;
+        }
+
+        .back-save {
+            padding: 0.5rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            background-color: violet;
+        }
+
+        .contents p {
+            background-color: tomato;
+            margin: 1rem 0 0 0;
+            padding: 0.5rem;
+            overflow: hidden;
+        }
+
+        .contents-change {
+            background-color: yellow;
+            margin: 1rem 0 0 0;
+            padding: 0.5rem 3rem;
+            font-size: xx-large;
+            font-weight: bolder;
+            font-family: sans-serif;
+            overflow: hidden;
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- html starts here -->
+
+    <header>
+        <div class="container">
+            <div class="name">
+                <h1 id="welcome">Welcome user</h1>
+            </div>
+            <div class="action">
+                <h2> <a href="/"> Logout</a></h2>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="actions">
+            <div class="inputs">
+                <input id="note-heading" type="text" placeholder="Title">
+                <input id="note-value" type="text" style="display: none;" placeholder="notes...">
+                <div class="commands" style="display: none;">
+                    <h3 id="note-save">save</h3>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="notes">
+            <!-- notes here -->
+        </div>
+    </main>
+
+    <!-- script  -->
+
+    <script>
+
+        // setting host name
+        let host = "http://localhost";
+
+        let welcome = document.getElementById("welcome")
+
+        // split username in url
+        let url = location.search.replace("?", "").split("=")[1]
+
+        // displaying username at top
+        welcome.innerText = `welcome ${atob(url)}`;
+
+        // getting data from the server when user enters
+        (async _ => {
+            // clearing previous session storage
+            sessionStorage.clear()
+
+            // checking session storage
+            if (sessionStorage.getItem("AlreadyExist") == null || sessionStorage.getItem("AlreadyExist") == false) {
+
+                // getting data from the server
+                let result = await fetch(host + "/getData", { method: "post", body: JSON.stringify({ name: atob(url) }) })
+                let response = await result.text()
+                if (response == "0") {
+                    alert("something anonymous")
+                    document.write("relogin to continue...")
+                    location.assign(host)
+                }
+                let data = JSON.parse(response)
+
+                // displaying data
+                data.forEach(val => {
+                    createElement(val[0], val[1])
+
+                    // adding session storage
+                    sessionStorage.setItem(val[0], val[1])
+                })
+
+                sessionStorage.setItem("AlreadyExist", true)
+            }
+
+            // displaying data in session storage
+            else {
+                let length = sessionStorage.length
+                for (let i = 0; i < length; i++) {
+                    if (sessionStorage.key(i) == "AlreadyExist") continue
+                    createElement(sessionStorage.key(i), sessionStorage.getItem(sessionStorage.key(i)))
+                }
+
+            }
+
+            // adding events to the cards
+            clickEvent()
+
+            // off the design mode
+            document.designMode = "off"
+
+        })()
+
+        let note_heading = document.getElementById("note-heading")
+        note_heading.onclick = ev => {
+            let show = document.querySelectorAll("input[placeholder]")[1]
+            let action = document.querySelectorAll(".commands")[0]
+            show.removeAttribute("style")
+            action.removeAttribute("style")
+        }
+
+        let action = document.getElementsByClassName("inputs")
+        action.item(0).addEventListener("mouseleave", ev => {
+            let show = document.querySelectorAll("input[placeholder]")[1]
+            let action = document.querySelectorAll(".commands")[0]
+            show.setAttribute("style", "display:none")
+            action.setAttribute("style", "display:none")
+
+        })
+
+        // a variable for validating note's value
+        let checker = ""
+
+        function clickEvent() {
+
+            let note_element = document.querySelectorAll(".element")
+
+            // displaying specific card
+            note_element.forEach(val => {
+                val.onclick = ev => {
+                    let extend = val.querySelector(".extend")
+                    extend.querySelectorAll("button").forEach(value => {
+                        value.style.display = "flex"
+                    })
+
+                    let notes = document.querySelector(".notes")
+                    notes.innerHTML = ""
+                    notes.className = "element-view"
+                    notes.innerHTML = val.innerHTML
+
+                    let contents = document.getElementsByClassName("contents")[0]
+                    contents.className = "contents-change"
+                    document.designMode = "on"
+                    checker = contents.textContent.trim()
+                }
+
+            })
+        }
+
+        // saving new note
+        let note__save = document.getElementById("note-save")
+        note__save.addEventListener("click", async ev => {
+            let note_heading = document.getElementById("note-heading").value || "default"
+            let note_value = document.getElementById("note-value").value || "default"
+
+            // checking as it is already exists
+            let flag = true
+            let length = sessionStorage.length
+            for (let i = 0; i < length; i++) {
+                if (note_heading == sessionStorage.key(i)) {
+                    flag = false
+                    break
+                }
+            }
+            if (!flag) alert(`Title ${note_heading} already exists`)
+
+            // creating new notes
+            else {
+                let response = await fetch(host + "/addNotes", { method: "post", body: JSON.stringify({ key: note_heading, value: note_value, name: atob(url) }) })
+                let data = await response.text()
+                if (data != "1") alert("data error occured")
+                else {
+                    createElement(note_heading, note_value)
+
+                    // setting to session storage
+                    sessionStorage.setItem(note_heading, note_value)
+                }
+
+            }
+            clickEvent()
+            document.designMode = "off"
+
+            // clearing the input tags
+            document.getElementById("note-heading").value = ""
+            document.getElementById("note-value").value = ""
+        })
+
+        // back to main page
+        function extend_back() {
+            let parent = document.querySelector("main")
+            parent.textContent = " "
+
+            let notes = document.createElement("div")
+            notes.className = "notes"
+            parent.append(notes)
+
+            let length = sessionStorage.length
+            for (let i = 0; i < length; i++) {
+                if (sessionStorage.key(i) == "AlreadyExist") continue
+                createElement(sessionStorage.key(i), sessionStorage.getItem(sessionStorage.key(i)))
+            }
+            clickEvent()
+            document.designMode = "off"
+        }
+
+        // save the updated details
+        async function extend_save() {
+            let changed = document.querySelector("body > main > div > div.contents-change")
+            let cg = changed.textContent.trim()
+
+            if (cg == checker) alert("no changes occured")
+            else {
+                let key = document.querySelector("body > main > div > div.extend > h1").textContent.trim()
+                let response = await fetch("/updateData", { method: "post", body: JSON.stringify({ key, value: cg, name: atob(url) }) })
+                let data = await response.text()
+                if (data == 1) {
+                    sessionStorage.setItem(key, cg)
+                } else if (data > 1) {
+                    alert("key duplicated")
+                }
+                else {
+                    alert("some title error occured")
+                }
+            }
+
+            let parent = document.querySelector("main")
+            parent.textContent = " "
+
+            let notes = document.createElement("div")
+            notes.className = "notes"
+            parent.append(notes)
+
+            let length = sessionStorage.length
+            for (let i = 0; i < length; i++) {
+                if (sessionStorage.key(i) == "AlreadyExist") continue
+                createElement(sessionStorage.key(i), sessionStorage.getItem(sessionStorage.key(i)))
+            }
+            clickEvent()
+            document.designMode = "off"
+        }
+
+        // deleting a note
+        async function extend_delete() {
+            let key = document.querySelector("body > main > div > div.extend > h1").textContent.trim()
+
+            let result = await fetch("/removeData", { method: "post", body: JSON.stringify({ name: atob(url), key }) })
+            let data = await result.text()
+
+            sessionStorage.removeItem(key)
+
+            let parent = document.querySelector("main")
+            parent.textContent = " "
+
+            let notes = document.createElement("div")
+            notes.className = "notes"
+            parent.append(notes)
+
+            let length = sessionStorage.length
+            for (let i = 0; i < length; i++) {
+                if (sessionStorage.key(i) == "AlreadyExist") continue
+                createElement(sessionStorage.key(i), sessionStorage.getItem(sessionStorage.key(i)))
+            }
+            clickEvent()
+            document.designMode = "off"
+        }
+
+        // creating notes element
+        function createElement(title, note) {
+            let element = document.createElement("div")
+            element.className = "element"
+
+            let extend = document.createElement("div")
+            extend.className = "extend"
+
+            let back = document.createElement("button")
+            let save = document.createElement("button")
+            let remove = document.createElement("button")
+            let h1 = document.createElement("h1")
+
+            h1.textContent = title
+
+            back.className = "back-save"
+            remove.className = "back-save"
+            save.className = "back-save"
+
+            back.style.display = "none"
+            remove.style.display = "none"
+            save.style.display = "none"
+
+            back.setAttribute("onclick", "extend_back()");
+            remove.setAttribute("onclick", "extend_delete()");
+            save.setAttribute("onclick", "extend_save()");
+
+            back.textContent = "back"
+            save.textContent = "save"
+            remove.textContent = "delete"
+
+            extend.append(back, h1, save, remove)
+
+            element.append(extend)
+
+            let content = document.createElement("div")
+            content.className = "contents"
+
+            let p = document.createElement("p")
+            p.textContent = note
+
+            content.append(p)
+
+            element.append(content)
+
+            let parent = document.querySelector(".notes")
+            parent.prepend(element)
+        }
+    </script>
+
+</body>
+
+</html>

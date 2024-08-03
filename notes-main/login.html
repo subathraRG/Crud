@@ -1,0 +1,150 @@
+<!-- login page -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- meta datas -->
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <!-- css part -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background-color: rgb(17, 127, 163);
+        }
+
+        main .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        main .container .message {
+            font-size: xx-large;
+            padding: 1rem;
+            margin: 1rem;
+        }
+
+        main .container .message p {
+            font-size: 1em;
+        }
+
+        main .container .actions {
+            display: flex;
+            flex-direction: column;
+            font-size: x-large;
+            align-items: flex-start;
+            padding: 0.5rem;
+            margin: 1rem;
+        }
+
+        main .container .actions input {
+            padding: 1rem;
+            margin: 1rem 0;
+            font-size: 1rem;
+            font-weight: bolder;
+            border-radius: 1rem;
+            border-style: none;
+        }
+
+        main .container .forgot {
+            margin: 1rem;
+            font-size: x-large;
+            color: blue;
+            cursor: pointer;
+        }
+
+        main .container .button {
+            padding: 1rem;
+            margin: 1rem;
+        }
+
+        main .container .button button {
+            border: none;
+            border-radius: 1rem;
+            padding: 0.4rem;
+            margin: 1rem;
+            font-size: xx-large;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- html part -->
+
+    <main>
+        <div class="container">
+            <div class="message">
+                <h1>Welcome Back!</h1>
+                <p>Don't have an account yet <a href="/signUp">sign up</a></p>
+            </div>
+            <div class="actions">
+                Username <input type="text">
+                Password <input type="password">
+            </div>
+            <div class="forgot">
+                <a>
+                    <p id="forgot">Forgot password?</p>
+                </a>
+            </div>
+            <div class="button">
+                <button>submit</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- script part -->
+
+    <script>
+
+        let host = "http://localhost"
+
+        let forgot = document.getElementById("forgot")
+        forgot.addEventListener("click", ev => {
+            alert("contact admin")
+        })
+        document.querySelector("button").addEventListener("click", async ev => {
+            let username = document.querySelectorAll("input")[0].value
+            let password = document.querySelectorAll("input")[1].value
+            if (username == "") document.querySelectorAll("input")[0].style.backgroundColor = "red"
+            if (password == "") document.querySelectorAll("input")[1].style.backgroundColor = "red"
+            else {
+                let obj = {
+                    name: username,
+                    password
+                }
+                let response = await fetch(`${host}/login`, { method: "post", body: JSON.stringify(obj) })
+                if (await response.text() == "1") location.assign(host + `/main?id=${btoa(obj.name)}`)
+                else alert("invalid details")
+            }
+        })
+
+    </script>
+</body>
+
+</html>
